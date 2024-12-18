@@ -24,6 +24,9 @@ if __name__ == "__main__":
     glClearColor(0.2, 0.2, 0.2, 1)
     
     glEnable(GL_DEPTH_TEST)
+    glEnable(GL_CULL_FACE)
+    glCullFace(GL_BACK)
+    glEnable(GL_MULTISAMPLE)
     
     TOP_FACE = np.array([
         [-0.5, -0.5, 0.5,],
@@ -37,7 +40,25 @@ if __name__ == "__main__":
     indices = TOP_FACE_EBO
     
     face_instances = np.array([0, 1, 2, 3, 4, 5], dtype=np.uint8) # To indicate which faces to render
+    faces = np.array([
+        # First Cube
+        0, 1, 2, 3, 4, 5, 
+        ], dtype=np.uint8)
+    positions = np.array([
+    #    x  z  y
+        # First Cube
+        [0, 0, 0],  
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+    ], dtype=np.uint8)
     
+    instance_count = len(faces)
+    print(instance_count)
+    instance_data = np.hstack((faces[:, np.newaxis], positions))
+    print(instance_data)
     
     vao = glGenVertexArrays(1)
     vbo = glGenBuffers(1)
@@ -55,10 +76,14 @@ if __name__ == "__main__":
     
     # Setup instance buffer
     glBindBuffer(GL_ARRAY_BUFFER, instance_vbo)
-    glBufferData(GL_ARRAY_BUFFER, face_instances.nbytes, face_instances, GL_STATIC_DRAW)
-    glVertexAttribIPointer(1, 1, GL_UNSIGNED_BYTE, 0, ctypes.c_void_p(0))
+    glBufferData(GL_ARRAY_BUFFER, instance_data.nbytes, instance_data, GL_STATIC_DRAW)
+    glVertexAttribIPointer(1, 4, GL_UNSIGNED_BYTE, 4, ctypes.c_void_p(0))
+    glVertexAttribIPointer(2, 3, GL_UNSIGNED_BYTE, 4, ctypes.c_void_p(1))
     glEnableVertexAttribArray(1)
+    glEnableVertexAttribArray(2)
     glVertexAttribDivisor(1, 1)
+    glVertexAttribDivisor(2, 1)
+    
     
     # Setup element buffer
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo)
@@ -83,7 +108,7 @@ if __name__ == "__main__":
         print(glGetProgramInfoLog(progshaderProgramram).decode())
         
     # Uniforms
-    model = glm.mat4(1.0)
+    # model = glm.mat4(1.0)
     projection = glm.perspective(glm.radians(45.0), 800/600, 0.1, 100.0)
     view = glm.mat4(1.0)
     
@@ -105,16 +130,16 @@ if __name__ == "__main__":
         
         view = camera.get_view_matrix()
         
-        modelLoc = glGetUniformLocation(shaderProgram, "model")
+        # modelLoc = glGetUniformLocation(shaderProgram, "model")
         viewLoc = glGetUniformLocation(shaderProgram, "view")
         projLoc = glGetUniformLocation(shaderProgram, "projection")
         
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm.value_ptr(model))
+        # glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm.value_ptr(model))
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm.value_ptr(view))
         glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm.value_ptr(projection))
         
         glBindVertexArray(vao)
-        glDrawElementsInstanced(GL_TRIANGLES, len(indices), GL_UNSIGNED_INT, None, len(face_instances))
+        glDrawElementsInstanced(GL_TRIANGLES, len(indices), GL_UNSIGNED_INT, None, instance_count)
         
         pg.display.flip()
         pg.time.wait(3)

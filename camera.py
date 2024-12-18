@@ -44,8 +44,6 @@ class Camera:
         xoffset *= self.sensitivity
         yoffset *= self.sensitivity
         
-        print(xoffset, yoffset)
-        
         # Update rotation angles
         self.yaw += xoffset  # Allow continuous horizontal rotation
         self.pitch = max(-89.0, min(89.0, self.pitch + yoffset))  # Limit vertical rotation
