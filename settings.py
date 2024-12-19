@@ -7,22 +7,36 @@ from OpenGL.GL.shaders import compileProgram, compileShader
 import numpy as np
 from numba import njit
 
+# Window settings
+SCREEN_WIDTH = 1280
+SCREEN_HEIGHT = 720
+SCREEN_SIZE = (SCREEN_WIDTH, SCREEN_HEIGHT)
+ASP_RATIO = SCREEN_WIDTH / SCREEN_HEIGHT
+NEAR = 0.1
+FAR = 1000.0
+
+
 CHUNK_SIZE = 32
 CHUNK_AREA = CHUNK_SIZE * CHUNK_SIZE
 CHUNK_VOLUME = CHUNK_AREA * CHUNK_SIZE
 
+WORLD_WIDTH, WORLD_HEIGHT = 2, 2
+WORLD_DEPTH = 2
+WORLD_AREA = WORLD_WIDTH * WORLD_DEPTH
+WORLD_VOLUME = WORLD_AREA * WORLD_HEIGHT 
+
+CENTRE_XZ = (WORLD_WIDTH * CHUNK_SIZE)
+CENTRE_Y = (WORLD_HEIGHT * CHUNK_SIZE)
+
+# Player settings
+PLAYER_POS = glm.vec3(CHUNK_SIZE/2, CHUNK_SIZE + 1, CHUNK_SIZE/2)
+PLAYER_SPEED = 0.005
+PLAYER_SENSITIVITY = 0.1
+PLAYER_FOV = 90
+
 ROT_X = glm.rotate(glm.mat4(1), glm.radians(90), glm.vec3(1, 0, 0))
 ROT_Y = glm.rotate(glm.mat4(1), glm.radians(90), glm.vec3(0, 1, 0))
 ROT_Z = glm.rotate(glm.mat4(1), glm.radians(90), glm.vec3(0, 0, 1))
-
-# bottom face quad vertices
-BOTTOM_FACE = np.array([
-    [0, 0, 0,],
-    [1, 0, 0,],
-    [1, 0, 1,],
-    [0, 0, 1,],
-], dtype=np.float32)
-BOTTOM_FACE_EBO = np.array([0, 1, 2, 0, 2, 3], dtype=np.uint32)
 
 TOP_FACE = np.array([
     [0, 1, 0,],
@@ -31,35 +45,3 @@ TOP_FACE = np.array([
     [0, 1, 1,],
 ], dtype=np.float32)
 TOP_FACE_EBO = np.array([0, 1, 2, 0, 2, 3], dtype=np.uint32)
-
-FRONT_FACE = np.array([
-    [0, 0, 0,],
-    [1, 0, 0,],
-    [1, 1, 0,],
-    [0, 1, 0,],
-], dtype=np.float32)
-FRONT_FACE_EBO = np.array([0, 1, 2, 0, 2, 3], dtype=np.uint32)
-
-BACK_FACE = np.array([
-    [0, 0, 1,],
-    [1, 0, 1,],
-    [1, 1, 1,],
-    [0, 1, 1,],
-], dtype=np.float32)
-BACK_FACE_EBO = np.array([0, 1, 2, 0, 2, 3], dtype=np.uint32)
-
-LEFT_FACE = np.array([
-    [0, 0, 0,],
-    [0, 0, 1,],
-    [0, 1, 1,],
-    [0, 1, 0,],
-], dtype=np.float32)
-LEFT_FACE_EBO = np.array([0, 1, 2, 0, 2, 3], dtype=np.uint32)
-
-RIGHT_FACE = np.array([
-    [1, 0, 0,],
-    [1, 0, 1,],
-    [1, 1, 1,],
-    [1, 1, 0,],
-], dtype=np.float32)
-RIGHT_FACE_EBO = np.array([0, 1, 2, 0, 2, 3], dtype=np.uint32)

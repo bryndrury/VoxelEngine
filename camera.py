@@ -27,6 +27,10 @@ class Camera:
             self.position -= glm.normalize(glm.cross(self.front, self.up)) * self.speed * deltaT
         if keys[pg.K_d]:
             self.position += glm.normalize(glm.cross(self.front, self.up)) * self.speed * deltaT
+        if keys[pg.K_SPACE]:
+            self.position += self.speed * self.up * deltaT
+        if keys[pg.K_LSHIFT]:
+            self.position -= self.speed * self.up * deltaT
 
     def process_mouse(self, xpos, ypos):
         if self.first_mouse:
