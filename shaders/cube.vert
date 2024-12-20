@@ -8,6 +8,7 @@ layout (location = 1) in int aFaceNormalID;
 layout (location = 2) in ivec3 aChunkPosition;
 
 // Uniforms
+uniform mat4 chunk_model; // Per Chunk basis
 uniform mat4 view;
 uniform mat4 projection;
 
@@ -97,5 +98,5 @@ void main()
         aChunkPosition.x, aChunkPosition.y, aChunkPosition.z, 1.0
     );
     
-    gl_Position = projection * view * model * faceRotationMat * vec4(aPos, 1.0);
+    gl_Position = projection * view * chunk_model * model * faceRotationMat * vec4(aPos, 1.0);
 }

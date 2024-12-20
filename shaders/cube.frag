@@ -34,7 +34,7 @@ float faceColor(int normal_id) {
 }
 
 vec2 getTextCoord(int normal_id, vec2 uv) {
-    int testing = 1;
+    int testing = 0;
     if (testing == 1) {
         return uv;
     }

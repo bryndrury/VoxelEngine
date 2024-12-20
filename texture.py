@@ -2,9 +2,9 @@ from settings import *
 
 class Texture():
     
-    def __init__(self):
+    def __init__(self, filename="test.png"):
         self.image = None
-        self.texture = self.generate_texture("test.png")
+        self.texture = self.generate_texture(filename)
         
     def generate_texture(self, filename):
         
@@ -25,10 +25,13 @@ class Texture():
 
         return self.texture
     
-    def use_texture(self, shader):
+    def use_texture(self, shaderProgram):
+        glUseProgram(shaderProgram)
         glBindTexture(GL_TEXTURE_2D, self.texture)
         
-    def unbind_texture(self):
+        
+    def unbind_texture(self, shaderProgram):
+        glUseProgram(shaderProgram)
         glBindTexture(GL_TEXTURE_2D, 0)
         
         
