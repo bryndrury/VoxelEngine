@@ -1,7 +1,7 @@
 from settings import *
-from chunk import Chunk
 from texture import Texture
 from camera import Camera
+from world import World
 import sys
 import gc
 
@@ -16,15 +16,17 @@ class Engine():
         self.initialise_attributes()
         self.setup_chunk_buffers()
         self.setup_chunk_shader()
+        self.setup_world()
         
     def initialise_attributes(self):
-        self.camera = Camera(pos=PLAYER_POS)
+        self.world = None
+        self.camera = Camera(pos=PLAYER_POS, front=PLAYER_DIR)
         self.clock = pg.time.Clock()
         
         self.vao = glGenVertexArrays(1)
         self.vbo = glGenBuffers(1)
         self.ebo = glGenBuffers(1)
-        self.texture = Texture("texture.png")
+        self.texture = Texture("test.png")
         
         self.running = True
         self.frame_start = 0
@@ -37,6 +39,10 @@ class Engine():
         pg.display.gl_set_attribute(pg.GL_CONTEXT_PROFILE_MASK, pg.GL_CONTEXT_PROFILE_CORE)
         pg.display.gl_set_attribute(pg.GL_CONTEXT_FORWARD_COMPATIBLE_FLAG, 1)
         pg.display.gl_set_attribute(pg.GL_DEPTH_SIZE, 24)
+        # Anti-aliasing
+        pg.display.gl_set_attribute(pg.GL_MULTISAMPLEBUFFERS, 1)
+        pg.display.gl_set_attribute(pg.GL_MULTISAMPLESAMPLES, 16)
+        pg.display.gl_set_attribute(pg.GL_ACCELERATED_VISUAL, 1)
         
         pg.event.set_grab(True)
         pg.mouse.set_visible(False)
@@ -44,15 +50,20 @@ class Engine():
         pg.mouse.set_pos((400, 300))
         pg.display.set_caption("Voxel Engine")
     
-        self.screen = pg.display.set_mode(SCREEN_SIZE, pg.OPENGL | pg.DOUBLEBUF | pg.RESIZABLE)
+        self.screen = pg.display.set_mode(SCREEN_SIZE, pg.OPENGL | pg.DOUBLEBUF | pg.RESIZABLE, 1)
                      
     def setup_OpenGL(self):
         glClearColor(178.0/255.0, 223.0/255, 237.0/255.0, 1)
         glEnable(GL_DEPTH_TEST)
         glEnable(GL_CULL_FACE)
         glCullFace(GL_BACK)
-        glEnable(GL_MULTISAMPLE)
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
+        # Anti-aliasing
+        glEnable(GL_MULTISAMPLE)
+        glEnable(GL_LINE_SMOOTH)
+        glEnable(GL_POLYGON_SMOOTH)
+        glHint(GL_LINE_SMOOTH_HINT, GL_FASTEST)
+        glHint(GL_POLYGON_SMOOTH_HINT, GL_FASTEST)
     
     def setup_chunk_buffers(self):
             
@@ -94,13 +105,12 @@ class Engine():
         self.chunkShaderProgram = shaderProgram
         
     def setup_world(self):
-        self.chunks = [None for _ in range(WORLD_VOLUME)]
-        for wx in range(WORLD_WIDTH):
-            for wz in range(WORLD_HEIGHT):
-                for wy in range(WORLD_DEPTH):
-                    self.chunks[wx + wz * WORLD_WIDTH + wy * WORLD_WIDTH * WORLD_HEIGHT] = Chunk(shaderProgram=self.chunkShaderProgram,pos=(wx * CHUNK_SIZE, wy * CHUNK_SIZE, wz * CHUNK_SIZE))
+        self.world = World(self.chunkShaderProgram)
         
     def handle_events(self):
+        
+        self.frame_start = pg.time.get_ticks()
+        
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 self.running = False
@@ -115,7 +125,7 @@ class Engine():
         view = self.camera.get_view_matrix()
         projection = glm.perspective(glm.radians(PLAYER_FOV), ASP_RATIO, NEAR, FAR)
         
-        # modelLoc = glGetUniformLocation(shaderProgram, "model")
+        # modelLoc = glGetUniformLocation(self.chunkShaderProgram, "model")
         viewLoc = glGetUniformLocation(self.chunkShaderProgram, "view")
         projLoc = glGetUniformLocation(self.chunkShaderProgram, "projection")
         
@@ -126,15 +136,12 @@ class Engine():
         
         glBindVertexArray(self.vao)
         
-        for chunk in self.chunks:
-            if chunk is not None:
-                chunk.render()
+        self.world.render(view, projection)
         
         pg.display.flip()
         
         pg.display.set_caption(f"Voxel Engine | CPU time: {CPU_time} ms | GPU time: {pg.time.get_ticks() - self.frame_start - CPU_time} ms | FPS: {self.clock.get_fps() :.0f}")
         
-        # pg.time.wait(5)
         self.clock.tick()
         
     def shutdown(self):
@@ -150,13 +157,12 @@ class Engine():
         print("Program terminated successfully.")
         
     def run(self):
-        self.setup_world()
         
         while self.running:
-            self.frame_start = pg.time.get_ticks()
             
             self.handle_events()
             self.render()
+            pg.time.wait(30)
         
         self.shutdown()
         

@@ -23,7 +23,7 @@ const vec2 uv_coords[4] = vec2[4](
 
 const int uv_indices[12] = int[12](
     3, 1, 0, 2, 1, 2,
-    2, 2, 2, 2, 2, 2
+    2, 1, 2, 3, 1, 0
 );
 
 mat4 rotateX(float angle) {
