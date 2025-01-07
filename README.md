@@ -4,6 +4,8 @@ I also have intentions to rewrite this in C++ for a more comprehensive implement
 
 This implementation uses OpenGL 3.3 using PyOpenGL. The bindings in the are pretty much the same as those in the C++ bindings which will make the conversion easier. This is why I chose PyOpenGL over something more convenient like ModernGL as found in StanislavPetrovV's tutorial.
 
+I still need to implement the occlusion culling of the chunk boundaries and add the ambient occlusion system.
+
 Run simply using:
 
     python3 app.py

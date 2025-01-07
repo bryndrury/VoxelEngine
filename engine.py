@@ -162,7 +162,7 @@ class Engine():
             
             self.handle_events()
             self.render()
-            pg.time.wait(30)
+            pg.time.wait(12) # 60 FPS Cap
         
         self.shutdown()
         
